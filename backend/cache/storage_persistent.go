@@ -121,7 +121,11 @@ func (b *Persistent) connect() error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to create a data directory %q", b.dataPath)
 	}
-	b.db, err = bolt.Open(b.dbPath, 0644, &bolt.Options{Timeout: b.features.DbWaitTime})
+	b.db, err = bolt.Open(b.dbPath, 0644, &bolt.Options{
+		Timeout:        b.features.DbWaitTime,
+		NoSync:         true,
+		NoFreelistSync: true,
+		NoGrowSync:     true})
 	if err != nil {
 		return errors.Wrapf(err, "failed to open a cache connection to %q", b.dbPath)
 	}
