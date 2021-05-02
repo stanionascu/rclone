@@ -14,6 +14,7 @@ type Options struct {
 	NoChecksum        bool          // don't check checksums if set
 	ReadOnly          bool          // if set VFS is read only
 	NoModTime         bool          // don't read mod times for files
+	RelaTime          bool          // update ATime only every 24 hours
 	DirCacheTime      time.Duration // how long to consider directory listing cache valid
 	PollInterval      time.Duration
 	Umask             int
@@ -40,6 +41,7 @@ var DefaultOpt = Options{
 	NoModTime:         false,
 	NoChecksum:        false,
 	NoSeek:            false,
+	RelaTime:          false,
 	DirCacheTime:      5 * 60 * time.Second,
 	PollInterval:      time.Minute,
 	ReadOnly:          false,

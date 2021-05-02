@@ -229,6 +229,15 @@ func (item *Item) _save() (err error) {
 	return nil
 }
 
+// update access time of the item
+//
+// call with the lock held
+func (item *Item) _updateATime() {
+	if !item.c.opt.RelaTime || time.Since(item.info.ATime).Hours() >= 24.0 {
+		item.info.ATime = time.Now()
+	}
+}
+
 // truncate the item to the given size, creating it if necessary
 //
 // this does not mark the object as dirty
@@ -509,7 +518,7 @@ func (item *Item) open(o fs.Object) (err error) {
 	item.mu.Lock()
 	defer item.mu.Unlock()
 
-	item.info.ATime = time.Now()
+	item._updateATime()
 
 	osPath, err := item.c.mkdir(item.name) // No locking in Cache
 	if err != nil {
@@ -627,7 +636,7 @@ func (item *Item) Close(storeFn StoreFn) (err error) {
 	item.mu.Lock()
 	defer item.mu.Unlock()
 
-	item.info.ATime = time.Now()
+	item._updateATime()
 	item.opens--
 
 	if item.opens < 0 {
@@ -1246,7 +1255,7 @@ func (item *Item) readAt(b []byte, off int64) (n int, err error) {
 		return 0, err
 	}
 
-	item.info.ATime = time.Now()
+	item._updateATime()
 	// Do the reading with Item.mu unlocked and cache protected by preAccess
 	n, err = item.fd.ReadAt(b, off)
 	return n, err
